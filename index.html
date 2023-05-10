@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>ETH Lottery</title>
+	<style>
+        body {
+        background: rgb(145,213,211);
+        background: linear-gradient(90deg, rgba(145,213,211,1) 0%, rgba(233,149,149,1) 100%);
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        }
+
+        header {
+        background-color: #1f1a1e;
+        padding: 20px;
+        box-shadow: 0px 5px 10px rgba(0,0,0,0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 6vw; /* Set a fixed height for the header */
+        padding-top: .1vh; /* Adjust the top padding */
+        padding-bottom: .1vh; /* Adjust the bottom padding */
+        }
+
+        @font-face {
+        font-family: 'Mont';
+        src: url('mont.otf') format('opentype');
+        }
+
+
+        h1 {
+        font-family: 'Mont', Arial, sans-serif;    
+        margin: 0;
+        font-size: 4rem;
+        color: white;
+        position: absolute; /* Position the element absolutely */
+        left: 35%; /* Move the text to the right by 10% of the viewport width */
+        }
+
+        button {
+        position: absolute;
+        left: 75vw;
+        background-color: #1e90ff;
+        color: #fff;
+        padding: .1vh .2vh;
+        border: none;
+        border-radius: 5px;
+        font-size: 2rem;
+        cursor: pointer;
+        width: 20vw; /* Set a fixed width for the button */
+        height: 8vh;
+        }
+
+        button:hover {
+        background-color: #007bff;
+        }
+
+        .wallet-button {
+        background-color: transparent;
+        border: none;
+        padding: .1vh .2vh;
+        display: flex;
+        align-items: center;
+        font-size: 2rem;
+        cursor: pointer;
+        }
+
+        .wallet-button:hover {
+        background-color: #f5f5f5;
+        }
+        .counter {
+            font-size: 6rem;
+            font-weight: 900;
+            color: rgb(24, 88, 19);
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-shadow: 3px 3px 3px black;
+        }
+        .prize-pool-label {
+            font-size: 4rem;
+            font-weight: 600;
+            color: rgba(255, 238, 201, 0.945);
+            position: absolute;
+            top: calc(40% - 20vh);
+            left: 50%;
+            transform: translateX(-50%);
+            text-shadow: 
+                -2px -2px 0 black,
+                2px -2px 0 black,
+                -2px 2px 0 black,
+                2px 2px 0 black;
+            border-bottom: 6px solid black;
+        }
+        .question-button {
+        display: block;
+        position: absolute;
+        top: 23vh;
+        left: 70vw;
+        width: 40px;
+        height: 40px;
+        line-height: 40px;
+        text-align: center;
+        font-size: 2rem;
+        font-weight: bold;
+        color: white;
+        background-color: #1e90ff;
+        border: 2px solid white;
+        border-radius: 5px;
+        text-decoration: none;
+        z-index: 15;
+        }
+
+        .question-button:hover {
+        background-color: #007bff;
+        border-color: #007bff;
+        }
+
+        .question-button:hover .question-mark {
+        color: white;
+        }
+
+        .question-mark {
+        display: inline-block;
+        width: 100%;
+        height: 100%;
+        font-size: 1.5rem;
+        line-height: 40px;
+        color: white;
+        text-shadow: 
+            -1px -1px 0 black,
+            1px -1px 0 black,
+            -1px 1px 0 black,
+            1px 1px 0 black;
+        }
+
+        /* Modal styles */
+        .modal {
+        display: none;
+        position: fixed;
+        z-index: 20;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 50%;
+        max-width: 500px;
+        position: relative;
+        }
+
+        .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+        }
+
+        #stake-text {
+            font-size: 4rem;
+            font-weight: 600;
+            color: rgba(255, 238, 201, 0.945);
+            position: absolute;
+            top: 70%;
+            left: 10%;
+            text-shadow: 
+                -2px -2px 0 black,
+                2px -2px 0 black,
+                -2px 2px 0 black,
+                2px 2px 0 black;
+            z-index: 10;
+
+        }
+
+        #user-stake {
+        font-weight: bold;
+        margin-left: 5px;
+        z-index: 10;
+
+        }
+
+        #odds-text {
+            font-size: 4rem;
+            font-weight: 600;
+            color: rgba(255, 238, 201, 0.945);
+            position: absolute;
+            top: 80%;
+            left: 10%;
+            text-shadow: 
+                -2px -2px 0 black,
+                2px -2px 0 black,
+                -2px 2px 0 black,
+                2px 2px 0 black;
+            z-index: 10;
+        }
+
+        #odds-stake {
+        font-weight: bold;
+        margin-left: 5px;
+        z-index: 10;
+
+        }
+
+        .rounded-box {
+        position: absolute;
+        left: 5vw;
+        top: 65vh;
+        width: 55vw;
+        height: 25vh;
+        background-color: #f5f5f5;
+        border-radius: 10px;
+        padding: 20px;
+        text-shadow: 
+            -2px -2px 0 black,
+            2px -2px 0 black,
+            -2px 2px 0 black,
+            2px 2px 0 black;
+        z-index: 1;
+        border: 2px solid black;
+        }
+
+        .stake-button {
+        background: linear-gradient(90deg, #FF6ACB, #2B86C5);
+        border: 2px solid black;
+        color: white;
+        font-weight: bold;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+        position: absolute;
+        top: 70vh;
+        }
+
+        .stake-button:hover {
+        transform: scale(1.1);
+        }
+
+        .unstake-button {
+        background: linear-gradient(90deg, #FF6ACB, #2B86C5);
+        border: 2px solid black;
+        color: white;
+        font-weight: bold;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+        position: absolute;
+        top: 80vh;
+        }
+
+        .unstake-button:hover {
+        transform: scale(1.1);
+        }
+
+        #stake-amount {
+            position: absolute;
+            display: none;
+            height: 4vh;
+            left: 84%;
+            top: 63%;
+        }
+
+        
+
+	</style>
+	<script src="https://cdn.jsdelivr.net/npm/web3@1.5.0/dist/web3.min.js"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es7"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es8"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es9"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es2021"></script>
+    <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+</head>
+<body>
+    <div id="stake-text">
+        Your stake: <span id="user-stake"></span>
+      </div>
+    <div id="odds-text">
+        Your odds: <span id="user-odds"></span>
+      </div>
+      
+    <div class="rounded-box">
+    </div>
+    <!-- Modal HTML -->
+    <div id="myModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <p>The ETH Powerball is a group lottery powered by staking rewards from ETH 2.0.  
+        Users have the ability to stake their ETH to participate in this group lottery.  
+        Interest from all users accrues to a single smart contract which uses Chainlink VRF to select a random winner each week who will take home the entire prize pool. 
+        <br><br>  
+        The chance of winning is given by the equation:
+        <br><br>
+        $$\text{chance of winning} = \frac{\text{rewards contributed by user}}{\text{rewards contributed by all users}}$$
+        <br><br>
+        In other words, your chance of winning is proportional to the amount you contributed to the rewards pool.
+        Users can unstake their ETH at anytime, but doing so before the competition ends forfeits their ability to win the prize.
+    </p>
+    </div>
+  </div>
+	<header>
+		<h1>ETH POWERBALL</h1>
+		<button>Connect Wallet</button>
+	</header>
+    <div class="prize-pool-label">Current Prize Pool</div>
+    <div class="counter">$<span id="prize-pool"></span></div>
+    <a href="#" class="question-button" title="How It Works">
+        <span class="question-mark">?</span>
+      </a>
+
+    <button class="stake-button" id="stake-button">Stake</button>
+    <button class="unstake-button">Unstake</button>
+    <!-- Add a button element with an ID "add-token-button" -->
+    <button id="add-token-button" class="question-button" style="left:56%; top:72%;" title="Add to Metamask">+</button>
+    <input id="stake-amount" type="number" min="0.01" step="0.01" value="0.1" style="text-align: center; font-size: 1rem;" />
+    <div id="eth-balance" style="position: fixed; top: 66%; left: 79%; transform: translate(-50%, -50%); font-weight: 900; font-size: 1rem; color: black; z-index: 100;"></div>
+
+    
+
+
+	<main>
+		<!-- Your main content goes here -->
+	</main>
+</body>
+<script>
+    // Define the button element
+    const connectButton = document.querySelector('button');
+    
+    // Check if Web3 is available
+    if (typeof window.ethereum !== 'undefined') {
+      // Initialize Web3 with the Ethereum provider injected by MetaMask
+      const web3 = new Web3(window.ethereum);
+    
+      // Define an array of supported web3 wallets with their names and logos
+      const wallets = [
+        { name: 'Metamask', logo: 'https://i.imgur.com/8x7Wuqe.png' },
+        // Add more wallets here as needed
+      ];
+    
+      let ethBalance = 0;
+
+    // Create a function to connect to the user's MetaMask account
+    async function connectToMetaMask() {
+    try {
+        // Request permission to connect to the user's MetaMask account
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+
+        // Get the user's account address
+        const accounts = await web3.eth.getAccounts();
+        const address = accounts[0];
+
+        // Replace the "Connect Wallet" button text with the user's ETH address
+        connectButton.textContent = `${address.substr(0, 6)}...`;
+
+        // Get the user's ETH balance
+        const balance = await web3.eth.getBalance(address);
+        ethBalance = web3.utils.fromWei(balance, 'ether');
+        console.log(ethBalance);
+
+        const ethBalanceElement = document.getElementById("eth-balance");
+        ethBalanceElement.textContent = ethBalance.substr(0, 6) + " ETH";
+
+        updateCurrentStake();
+        // Call the updateCurrentStake function every second to update the currentStake variable
+        setInterval(updateCurrentStake, 1000);
+
+        document.getElementById("stake-amount").style.display = "block";
+
+        // Do something with the user's address and balance, for example:
+        console.log(`Connected to MetaMask account ${address} with a balance of ${ethBalance} ETH`);
+    } catch (error) {
+        console.error(error);
+    }
+    }
+
+    
+
+    
+      // Add an event listener to the button to connect to MetaMask
+      connectButton.addEventListener('click', connectToMetaMask);
+    } else {
+      // Web3 is not available, show an error message or prompt the user to install MetaMask
+      console.error('MetaMask not detected. Please install MetaMask to connect to this site.');
+    }
+
+    // Get the prize pool element
+    const prizePoolElem = document.getElementById('prize-pool');
+
+    // Function to update the prize pool text
+    function updatePrizePoolText(prizePool) {
+    const prizePoolElement = document.getElementById('prize-pool');
+    const formattedPrizePool = prizePool.toLocaleString();
+    prizePoolElement.textContent = `$${formattedPrizePool}`;
+    }
+
+    // JavaScript to trigger the modal
+        const modal = document.getElementById("myModal");
+        const btn = document.querySelector(".question-button");
+        const span = document.querySelector(".close");
+
+        btn.addEventListener("click", function() {
+        modal.style.display = "block";
+        });
+
+        span.addEventListener("click", function() {
+        modal.style.display = "none";
+        });
+
+        window.addEventListener("click", function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+        });
+
+
+    //===================================================================================================
+
+
+    const LIDO_ABI =  [
+        {
+            constant: false,
+            inputs: [{ name: "_referral", type: "address" }],
+            name: "submit",
+            outputs: [{ name: "", type: "uint256" }],
+            payable: true,
+            stateMutability: "payable",
+            type: "function"
+        },
+
+        {
+            constant: true,
+            inputs: [{ name: "_owner", type: "address" }],
+            name: "balanceOf",
+            outputs: [{ name: "", type: "uint256" }],
+            payable: false,
+            stateMutability: "view",
+            type: "function"
+        }
+    ];
+
+    const stakeButton = document.getElementById("stake-button");
+
+    
+    const LIDO_ADDRESS = "0x1643E812aE58766192Cf7D2Cf9567dF2C37e9B7F"
+    const MY_REWARDS_ADDRESS = "0xaf3ae19d40bD2311eE95e4F92B019F9552D1C4f6"
+
+    // Object to track user addresses and staked tokens
+    const stakingInfo = {};
+    stakeButton.addEventListener("click", async () => {
+        try {
+            // enable provider
+            const [user] = await window.ethereum.request({
+                method: "eth_requestAccounts"
+            });
+
+            // init web3
+            const web3 = new Web3(window.ethereum);
+            web3.eth.Contract.setProvider(web3);
+
+            // init Lido
+            const lidoContract = new web3.eth.Contract(LIDO_ABI, LIDO_ADDRESS);
+
+            // stake
+            const amountToStake = stakeAmount.toString();
+            currentStake += amountToStake;
+
+            const tx = await lidoContract.methods
+                .submit(MY_REWARDS_ADDRESS)
+                .send({ from: user, value: web3.utils.toWei(amountToStake) });
+
+            console.log(tx);
+
+            // Fetch updated staked amount
+            const updatedStakedAmount = await lidoContract.methods.balanceOf(user).call();
+            const updatedStakedAmountInEth = web3.utils.fromWei(updatedStakedAmount, "ether");
+
+            currentStake = updatedStakedAmountInEth;
+
+            console.log("User:", user);
+            console.log("Staked:", amountToStake);
+            console.log("Total staked by user:", updatedStakedAmountInEth);
+            console.log("Staking info:", stakingInfo);
+
+            alert("Staked 0.1 ETH to Lido protocol!");
+        } catch (error) {
+            console.error(error);
+            alert("Error connecting wallet or staking ETH to Lido protocol.");
+        }
+    });
+
+    let currentStake = 0;
+
+    (async function() {
+    try {
+        const [user] = await window.ethereum.request({
+        method: "eth_requestAccounts"
+        });
+
+        // Initialize web3
+        const web3 = new Web3(window.ethereum);
+        web3.eth.Contract.setProvider(web3);
+
+        // Init Lido
+        const lidoContract = new web3.eth.Contract(LIDO_ABI, LIDO_ADDRESS);
+
+        // Get staked amount from the Lido contract
+        const stakedAmount = await lidoContract.methods.balanceOf(user).call();
+
+        const stakedAmountInEth = web3.utils.fromWei(stakedAmount, "ether");
+        currentStake = stakedAmountInEth;
+   
+    } catch (error) {
+        console.error(error);
+        alert("Error retrieving staked amount.");
+    }
+    })();
+
+
+        userStake = 202;
+        totalPool = 50044;
+
+        // Get a reference to the user-stake element
+        const userStakeElement = document.getElementById('user-stake');
+
+
+        // Define a function to update the currentStake variable with a random value
+        function updateCurrentStake() {
+            currentStake = currentStake.substr(0, 6);
+            userStakeElement.textContent = currentStake.toLocaleString() + " ETH";
+        }
+
+        // Get a reference to the user-odds element
+        const userOddsElement = document.getElementById('user-odds');
+
+        // Calculate the odds as 1 divided by the rounded stake percentage
+        const stakePercentage = userStake / totalPool;
+        const oddsDenominator = Math.round(1 / stakePercentage);
+        const oddsFraction = `~ 1/${oddsDenominator}`;
+
+        // Set the text content of the user-odds element to the odds fraction
+        userOddsElement.textContent = oddsFraction;
+
+
+        
+        // Example prize pool variable
+        let currentPrizePool = totalPool;
+
+        // Get a reference to the prize pool element
+        const prizePoolElement = document.getElementById('prize-pool');
+
+        // Update the prize pool text initially
+        updatePrizePoolText(currentPrizePool);
+
+        // Update the prize pool text whenever the current prize pool variable changes
+        setInterval(() => {
+        currentPrizePool += Math.random() * 10;
+        updatePrizePoolText(currentPrizePool);
+        }, 1000);
+
+        function updatePrizePoolText(prizePool) {
+        // Round the prize pool to the nearest integer
+        const roundedPrizePool = Math.round(prizePool);
+
+        // Convert the rounded prize pool to a string with commas for the thousands places
+        const formattedPrizePool = roundedPrizePool.toLocaleString();
+
+        // Set the text content of the prize pool element to the formatted prize pool value
+        prizePoolElement.textContent = `${formattedPrizePool}`;
+        }
+
+
+        // Define the LIDO token information
+        const tokenSymbol = "stETH";
+        const tokenDecimals = 18;
+        const tokenAddress = "0x1643E812aE58766192Cf7D2Cf9567dF2C37e9B7F";
+
+        // Get a reference to the "Add Token" button element
+        const addTokenButton = document.getElementById("add-token-button");
+
+        // Add a click event listener to the "Add Token" button
+        addTokenButton.addEventListener("click", async () => {
+        // Check if Metamask is installed
+        if (!window.ethereum) {
+            alert("Metamask is not installed!");
+            return;
+        }
+
+        // Add the LIDO token to Metamask
+        try {
+            const chainId = await window.ethereum.request({ method: "eth_chainId" });
+            await window.ethereum.request({
+            method: "wallet_watchAsset",
+            params: {
+                type: "ERC20",
+                options: {
+                address: tokenAddress,
+                symbol: tokenSymbol,
+                decimals: tokenDecimals,
+                image: "",
+                },
+            },
+            });
+
+            alert(`stETH token added to Metamask`);
+        } catch (error) {
+            console.error(error);
+            alert(`Error adding LIDO token to Metamask: ${error.message}`);
+        }
+        });
+
+        const stakeAmountInput = document.getElementById("stake-amount");
+        let stakeAmount = parseFloat(stakeAmountInput.value);
+
+        stakeAmountInput.addEventListener("input", () => {
+        stakeAmount = parseFloat(stakeAmountInput.value);
+        console.log(stakeAmount); // Print the stake amount to the console
+        });
+
+
+
+    </script>
+</html>
